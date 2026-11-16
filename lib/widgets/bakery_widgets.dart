@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../theme/bakery_theme.dart';
 
 /// Reuse approved PNG assets instead of redrawing the frames.
@@ -55,12 +55,12 @@ class QuantityControl extends StatelessWidget {
     return Semantics(
       label: 'Jumlah $quantity',
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        _QuantityButton(asset: 'assets/ui/quantity_minus.png',
+        _QuantityButton(asset: 'assets/ui/buttons/quantity_minus.png',
           size: buttonSize, label: 'Kurangi', onTap: quantity == 0 ? null : onMinus,
           symbol: '−', dark: false),
         SizedBox(width: compact ? 25 : 30, child: Text('$quantity',
           textAlign: TextAlign.center, style: BakeryText.heading(compact ? 15 : 18))),
-        _QuantityButton(asset: 'assets/ui/quantity_plus.png',
+        _QuantityButton(asset: 'assets/ui/buttons/quantity_plus.png',
           size: buttonSize, label: 'Tambah', onTap: onPlus,
           symbol: '+', dark: true),
       ]),
@@ -135,7 +135,7 @@ class DecoratedCheckoutButton extends StatelessWidget {
         onTap: onPressed,
         child: SizedBox(height: 72,
           child: Stack(alignment: Alignment.center, children: [
-            const Positioned.fill(child: PixelAsset('assets/ui/checkout_button.png',
+            const Positioned.fill(child: PixelAsset('assets/ui/frames/checkout_button_blank.png',
               fit: BoxFit.fill)),
             Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.shopping_bag_outlined, size: 22,

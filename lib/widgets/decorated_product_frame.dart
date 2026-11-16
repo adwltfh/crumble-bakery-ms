@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../theme/bakery_theme.dart';
 import 'bakery_widgets.dart';
 
@@ -18,7 +18,7 @@ class DecoratedProductFrame extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         PixelFrame(
-          asset: 'assets/ui/product_row_frame.png',
+          asset: 'assets/ui/frames/cart_products_panel_blank.png',
           padding: padding,
           child: child,
         ),

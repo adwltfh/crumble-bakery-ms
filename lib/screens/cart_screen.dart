@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import '../data/products.dart';
 import '../state/basket_controller.dart';
 import '../theme/bakery_theme.dart';
 import '../widgets/bakery_widgets.dart';
+import '../widgets/cute_bakery_widgets.dart';
 
+/// Cart is a real order summary; the approved artwork is only its decoration.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key, required this.basket});
   final BasketController basket;
@@ -20,154 +22,155 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BakeryViewport(
-    child: Scaffold(
-      backgroundColor: BakeryColors.background,
-      body: SafeArea(child: AnimatedBuilder(
-        animation: basket,
-        builder: (context, _) => CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [          
-            
-SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 174,
-                    child: Stack(
-                      children: [
-                        const Positioned.fill(
-                          child: PixelAsset(
-                            'assets/decor/cart_header_backdrop.png',
-                            fit: BoxFit.fill,
-                          ),
+        child: Scaffold(
+          backgroundColor: BakeryColors.background,
+          body: SafeArea(
+            child: AnimatedBuilder(
+              animation: basket,
+              builder: (context, _) => Stack(
+                children: [
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0xFFFFF2DC), Color(0xFFFFE4C3)],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            24,
-                            40,
-                            24,
-                            0,
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  _BackButton(
-                                    onTap: () => Navigator.of(context).pop(),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      'Keranjang',
-                                      textAlign: TextAlign.center,
-                                      style: BakeryText.heading(29),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 48),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 2,
-                                    color: BakeryColors.border,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    '${basket.itemCount} item dipilih',
-                                    style: BakeryText.label(14),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    width: 48,
-                                    height: 2,
-                                    color: BakeryColors.border,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-
-            SliverToBoxAdapter(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _CartContents(basket: basket),
-            )),
-            const SliverToBoxAdapter(child: SizedBox(height: 22)),
-            SliverToBoxAdapter(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _ShippingNotice(basket: basket),
-            )),
-            const SliverToBoxAdapter(child: SizedBox(height: 15)),
-            SliverToBoxAdapter(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _OrderSummary(basket: basket),
-            )),
-            const SliverToBoxAdapter(child: SizedBox(height: 18)),
-            SliverToBoxAdapter(child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: DecoratedCheckoutButton(
-                label: 'Buat Pesanan',
-                onPressed: basket.itemCount == 0
-                  ? null : () => _copyOrder(context),
+                  // Fixed illustrated lower scene; not an item in the scroll list.
+                  const Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: SizedBox(
+                        height: 190,
+                        child: PixelAsset(
+                          'assets/backgrounds/cart_footer_scene_exact.png',
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                  ),
+                  CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(child: _CartHeader(basket: basket)),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _CartContents(basket: basket),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _ShippingNotice(basket: basket),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _OrderSummary(basket: basket),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: _CuteCheckoutButton(
+                            onTap: basket.itemCount == 0
+                                ? null
+                                : () => _copyOrder(context),
+                          ),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(28, 10, 28, 0),
+                          child: Text(
+                            'Demo: pesanan disalin ke clipboard. '
+                            'Pembayaran dan pengiriman belum otomatis.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 10, color: BakeryColors.border),
+                          ),
+                        ),
+                      ),
+                      // Space to scroll above the fixed decorative scene.
+                      const SliverToBoxAdapter(child: SizedBox(height: 215)),
+                    ],
+                  ),
+                ],
               ),
-            )),
-            const SliverToBoxAdapter(child: Padding(
-              padding: EdgeInsets.fromLTRB(18, 7, 18, 26),
-              child: Text('Tahap demo: tombol menyalin rincian pesanan. '
-                'Belum ada pembayaran atau pengiriman otomatis.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: BakeryColors.border)),
-            )),
-            const SliverToBoxAdapter(child: PixelAsset(
-              'assets/decor/cart_bottom_scene.png', fit: BoxFit.fitWidth)),
-          ],
+            ),
+          ),
         ),
-      )),
-    ),
-  );
+      );
 }
 
-
-class _BackButton extends StatelessWidget {
-  const _BackButton({required this.onTap});
-
-  final VoidCallback onTap;
+class _CartHeader extends StatelessWidget {
+  const _CartHeader({required this.basket});
+  final BasketController basket;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Kembali ke menu',
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          width: 48,
-          height: 46,
-          decoration: BoxDecoration(
-            color: BakeryColors.cream,
-            border: Border.all(
-              color: BakeryColors.darkCocoa,
-              width: 3,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: BakeryColors.border,
-                offset: Offset(3, 3),
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final height = width * 183 / 579;
+      return SizedBox(
+        height: height + 15,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              bottom: 15,
+              child: const PixelAsset(
+                'assets/backgrounds/cart_header_decor_no_text.png',
+                fit: BoxFit.fill,
               ),
-            ],
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: BakeryColors.cocoa,
-          ),
+            ),
+            // Original back-button drawing already exists in PNG: hitbox only.
+            Positioned(
+              left: width * 0.052,
+              top: height * 0.30,
+              width: width * 0.108,
+              height: height * 0.34,
+              child: Semantics(
+                button: true,
+                label: 'Kembali ke menu',
+                child: InkWell(onTap: () => Navigator.of(context).pop()),
+              ),
+            ),
+            Positioned(
+              top: height * 0.40,
+              left: width * 0.23,
+              right: width * 0.23,
+              child: Text(
+                'Keranjang',
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: BakeryText.heading(width < 380 ? 23 : 27),
+              ),
+            ),
+            Positioned(
+              top: height * 0.75,
+              left: width * 0.28,
+              right: width * 0.28,
+              child: Text(
+                '${basket.itemCount} item dipilih',
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: BakeryText.label(width < 380 ? 11 : 13),
+              ),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -176,32 +179,36 @@ class _CartContents extends StatelessWidget {
   final BasketController basket;
 
   @override
-  Widget build(BuildContext context) => PixelFrame(
-    asset: 'assets/ui/product_row_frame.png',
-    padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-    child: basket.itemCount == 0
-      ? Padding(
-          padding: const EdgeInsets.symmetric(vertical: 31),
-          child: Column(children: [
-            const PixelAsset('assets/decor/basket_light.png',
-              width: 75, height: 75),
-            const SizedBox(height: 12),
-            Text('Keranjangmu masih kosong', style: BakeryText.label(16)),
-            const SizedBox(height: 4),
-            const Text('Yuk pilih rotinya dulu!',
-              style: TextStyle(color: BakeryColors.border)),
-          ]),
-        )
-      : Column(children: [
-          for (final product in basket.selectedProducts) ...[
-            _CartProduct(product: product, basket: basket),
-            if (product != basket.selectedProducts.last)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Divider(color: BakeryColors.border, thickness: 1)),
-          ],
-        ]),
-  );
+  Widget build(BuildContext context) => CuteFrame(
+        asset: 'assets/ui/frames/cart_products_panel_blank.png',
+        slice: const Rect.fromLTRB(36, 32, 540, 262),
+        padding: const EdgeInsets.fromLTRB(12, 17, 12, 17),
+        child: basket.itemCount == 0
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 25),
+                child: Column(
+                  children: [
+                    const PixelAsset('assets/ui/icons/basket_from_mockup.png', width: 70, height: 70),
+                    const SizedBox(height: 10),
+                    Text('Keranjangmu masih kosong', style: BakeryText.label(16)),
+                    const SizedBox(height: 5),
+                    Text('Yuk pilih roti favoritmu dulu!', style: BakeryText.label(12)),
+                  ],
+                ),
+              )
+            : Column(
+                children: [
+                  for (final product in basket.selectedProducts) ...[
+                    _CartProduct(product: product, basket: basket),
+                    if (product != basket.selectedProducts.last)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                        child: _DashedSeparator(),
+                      ),
+                  ],
+                ],
+              ),
+      );
 }
 
 class _CartProduct extends StatelessWidget {
@@ -210,45 +217,80 @@ class _CartProduct extends StatelessWidget {
   final BasketController basket;
 
   @override
-  Widget build(BuildContext context) {
-    final quantity = basket.quantityOf(product.id);
-    return LayoutBuilder(builder: (context, constraints) {
-      final compact = constraints.maxWidth < 320;
-      return SizedBox(
-        height: compact ? 100 : 105,
-        child: Row(
-  children: [
-    PixelAsset(product.asset, width: 58, height: 58),
-    const SizedBox(width: 14),
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            product.name,
-            style: BakeryText.label(16, weight: FontWeight.w900),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            rupiah(product.price),
-            style: BakeryText.label(13, weight: FontWeight.w500),
-          ),
-        ],
-      ),
-    ),
-    const SizedBox(width: 14),
-    QuantityControl(
-      quantity: quantity,
-      compact: true,
-      onPlus: () => basket.increment(product.id),
-      onMinus: () => basket.decrement(product.id),
-    ),
-  ],
-),
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 325;
+          final qty = basket.quantityOf(product.id);
+          return SizedBox(
+            height: 100,
+            child: Row(
+              children: [
+                CuteProductPlate(asset: product.asset, size: compact ? 56 : 68),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        product.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: BakeryText.label(compact ? 13 : 16,
+                            weight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        rupiah(product.price),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: BakeryText.label(compact ? 11 : 13),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    CuteQuantityControl(
+                      quantity: qty,
+                      compact: true,
+                      onPlus: () => basket.increment(product.id),
+                      onMinus: () => basket.decrement(product.id),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(rupiah(product.price * qty),
+                        style: BakeryText.label(compact ? 11 : 13)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       );
-    });
-  }
+}
+
+class _DashedSeparator extends StatelessWidget {
+  const _DashedSeparator();
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => Row(
+          children: List.generate(
+            (constraints.maxWidth / 11).floor(),
+            (_) => const Padding(
+              padding: EdgeInsets.only(right: 5),
+              child: SizedBox(
+                width: 6,
+                height: 1.5,
+                child: ColoredBox(color: Color(0xFFD8A584)),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _ShippingNotice extends StatelessWidget {
@@ -257,26 +299,28 @@ class _ShippingNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isEmpty = basket.itemCount == 0;
-    final message = isEmpty
-      ? 'Gratis ongkir untuk pembelian 6 item atau lebih'
-      : basket.qualifiesForFreeShipping
-        ? 'Gratis ongkir! Pesananmu sudah 6 item atau lebih.'
-        : 'Pesanan kurang dari 6 item dikenakan ongkir '
-          '${rupiah(basket.shippingFee)}. Tambah '
-          '${basket.remainingForFreeShipping} item untuk gratis ongkir.';
+    final text = basket.itemCount == 0
+        ? 'Gratis ongkir mulai 6 item.'
+        : basket.qualifiesForFreeShipping
+            ? 'Gratis ongkir! Pesananmu sudah 6 item atau lebih.'
+            : 'Kurang ${basket.remainingForFreeShipping} item lagi untuk gratis '
+                'ongkir. Ongkir ${rupiah(basket.shippingFee)}.';
     return SizedBox(
-      height: 90,
-      child: PixelFrame(
-        asset: 'assets/ui/shipping_notice_panel.png',
-        padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 10),
-        child: Row(children: [
-          const PixelAsset('assets/decor/delivery_truck.png',
-            width: 46, height: 47),
-          const SizedBox(width: 12),
-          Expanded(child: Text(message,
-            style: BakeryText.label(14, weight: FontWeight.w700))),
-        ]),
+      height: 83,
+      child: CuteFrame(
+        asset: 'assets/ui/frames/shipping_notice_blank.png',
+        slice: const Rect.fromLTRB(24, 20, 552, 75),
+        padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+        child: Row(
+          children: [
+            const Icon(Icons.local_shipping_outlined, size: 38, color: BakeryColors.cocoa),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(text,
+                  style: BakeryText.label(13, weight: FontWeight.w700)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -288,27 +332,32 @@ class _OrderSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 180,
-    child: PixelFrame(
-      asset: 'assets/ui/order_summary_panel.png',
-      padding: const EdgeInsets.fromLTRB(21, 15, 21, 18),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _SummaryRow('Subtotal (${basket.itemCount} item)', rupiah(basket.subtotal)),
-          const SizedBox(height: 13),
-          _SummaryRow('Ongkir', basket.shipping == 0
-            ? (basket.itemCount == 0 ? rupiah(0) : 'Gratis')
-            : rupiah(basket.shipping)),
-          const SizedBox(height: 14),
-          const Divider(color: BakeryColors.border, thickness: 1),
-          const SizedBox(height: 5),
-          _SummaryRow('Total Pembayaran', rupiah(basket.total),
-            emphasized: true),
-        ],
-      ),
-    ),
-  );
+        height: 166,
+        child: CuteFrame(
+          asset: 'assets/ui/frames/order_summary_blank.png',
+          slice: const Rect.fromLTRB(35, 35, 541, 148),
+          padding: const EdgeInsets.fromLTRB(18, 17, 18, 17),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _SummaryRow(
+                  'Subtotal (${basket.itemCount} item)', rupiah(basket.subtotal)),
+              const SizedBox(height: 10),
+              _SummaryRow(
+                'Ongkir',
+                basket.shipping == 0
+                    ? (basket.itemCount == 0 ? rupiah(0) : 'Gratis')
+                    : rupiah(basket.shipping),
+              ),
+              const SizedBox(height: 10),
+              const Divider(color: Color(0xFFCE9B78), height: 1.5, thickness: 1.5),
+              const SizedBox(height: 10),
+              _SummaryRow('Total Pembayaran', rupiah(basket.total),
+                  emphasized: true),
+            ],
+          ),
+        ),
+      );
 }
 
 class _SummaryRow extends StatelessWidget {
@@ -318,14 +367,69 @@ class _SummaryRow extends StatelessWidget {
   final bool emphasized;
 
   @override
-  Widget build(BuildContext context) => Row(children: [
-    Expanded(child: Text(label, style: BakeryText.label(emphasized ? 15 : 14,
-      weight: emphasized ? FontWeight.w900 : FontWeight.w500))),
-    const SizedBox(width: 8),
-    Text(value, style: TextStyle(
-      color: emphasized ? BakeryColors.button : BakeryColors.cocoa,
-      fontSize: emphasized ? 18 : 14,
-      fontWeight: FontWeight.w900,
-    )),
-  ]);
+  Widget build(BuildContext context) => Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: BakeryText.label(emphasized ? 14 : 13,
+                  weight: emphasized ? FontWeight.w900 : FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: emphasized ? BakeryColors.button : BakeryColors.cocoa,
+              fontSize: emphasized ? 18 : 13,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      );
+}
+
+class _CuteCheckoutButton extends StatelessWidget {
+  const _CuteCheckoutButton({required this.onTap});
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        enabled: onTap != null,
+        label: 'Buat Pesanan',
+        child: Opacity(
+          opacity: onTap == null ? .55 : 1,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              height: 76,
+              child: CuteFrame(
+                asset: 'assets/ui/frames/checkout_button_blank.png',
+                slice: const Rect.fromLTRB(34, 30, 500, 74),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.shopping_bag_outlined,
+                        color: Color(0xFFFFF6E9), size: 24),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Buat Pesanan',
+                      style: TextStyle(
+                        color: Color(0xFFFFF6E9),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const PixelAsset('assets/decor/sparkle.png',
+                        width: 19, height: 19),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 abstract final class BakeryColors {
   static const background = Color(0xFFFFEBD1);
@@ -13,18 +13,23 @@ abstract final class BakeryColors {
   static const butter = Color(0xFFFFD989);
   static const paleOrange = Color(0xFFFFE3A2);
   static const shadow = Color(0xFF793B2F);
+  static const Color topBg = Color(0xFFF5E1BF);
+  static const Color bottomBg = Color(0xFFF2E5D3);
 }
 
 abstract final class BakeryText {
   static TextStyle heading(double size) => TextStyle(
-    fontFamily: 'Georgia',
-    fontSize: size,
-    fontWeight: FontWeight.w900,
-    height: 1.08,
-    color: BakeryColors.cocoa,
-  );
+        fontFamily: 'Georgia',
+        fontSize: size,
+        fontWeight: FontWeight.w900,
+        height: 1.08,
+        color: BakeryColors.cocoa,
+      );
 
   static TextStyle label(double size, {FontWeight weight = FontWeight.w700}) =>
-      TextStyle(fontSize: size, fontWeight: weight,
-        height: 1.15, color: BakeryColors.cocoa);
+      TextStyle(
+          fontSize: size,
+          fontWeight: weight,
+          height: 1.15,
+          color: BakeryColors.cocoa);
 }

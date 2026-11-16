@@ -9,11 +9,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^1.11.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/hero/
-    - assets/products/
-    - assets/ui/
+    - assets/backgrounds/
     - assets/decor/
+    - assets/hero/
+    - assets/products/current_menu_7/
+    - assets/products/mockup_exact_style/
+    - assets/ui/buttons/
+    - assets/ui/frames/
+    - assets/ui/icons/
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

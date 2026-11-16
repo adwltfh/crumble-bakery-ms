@@ -1,0 +1,27 @@
+name: crumb_oven_store
+description: Cozy pixel-art bakery store microsite (Flutter Web).
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.11.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/hero/
+    - assets/products/
+    - assets/ui/
+    - assets/decor/
+    - assets/backgrounds/
+    - assets/preview/
+    - assets/reference/
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
