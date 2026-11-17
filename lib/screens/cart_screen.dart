@@ -5,6 +5,7 @@ import '../state/basket_controller.dart';
 import '../theme/bakery_theme.dart';
 import '../widgets/bakery_widgets.dart';
 import '../widgets/cute_bakery_widgets.dart';
+import '../widgets/cute_dashed_frame.dart';
 
 /// Cart is a real order summary; the approved artwork is only its decoration.
 class CartScreen extends StatelessWidget {
@@ -58,24 +59,26 @@ class CartScreen extends StatelessWidget {
                   CustomScrollView(
                     physics: const BouncingScrollPhysics(),
                     slivers: [
-                      SliverToBoxAdapter(child: _CartHeader(basket: basket)),
+                      SliverToBoxAdapter(child: _CartHeader(basket: basket)),      
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                          ),
                           child: _CartContents(basket: basket),
                         ),
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 16)),
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
                           child: _ShippingNotice(basket: basket),
                         ),
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 14)),
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
                           child: _OrderSummary(basket: basket),
                         ),
                       ),
@@ -182,7 +185,7 @@ class _CartContents extends StatelessWidget {
   Widget build(BuildContext context) => CuteFrame(
         asset: 'assets/ui/frames/cart_products_panel_blank.png',
         slice: const Rect.fromLTRB(36, 32, 540, 262),
-        padding: const EdgeInsets.fromLTRB(12, 17, 12, 17),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: basket.itemCount == 0
             ? Padding(
                 padding: const EdgeInsets.symmetric(vertical: 25),
@@ -225,7 +228,48 @@ class _CartProduct extends StatelessWidget {
             height: 100,
             child: Row(
               children: [
-                CuteProductPlate(asset: product.asset, size: compact ? 56 : 68),
+                SizedBox(
+                  width: compact ? 56 : 68,
+                  height: compact ? 56 : 68,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CuteProductPlate(
+                        asset: product.asset,
+                        size: compact ? 56 : 68,
+                      ),
+                      Positioned(
+                        top: -7,
+                        right: -7,
+                        child: Material(
+                          color: const Color(0xFFFFE8D3),
+                          borderRadius: BorderRadius.circular(5),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(5),
+                            onTap: () => basket.removeItem(product.id),
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFB47A61),
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 14,
+                                color: Color(0xFF8B4938),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -299,25 +343,37 @@ class _ShippingNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = basket.itemCount == 0
-        ? 'Gratis ongkir mulai 6 item.'
-        : basket.qualifiesForFreeShipping
-            ? 'Gratis ongkir! Pesananmu sudah 6 item atau lebih.'
-            : 'Kurang ${basket.remainingForFreeShipping} item lagi untuk gratis '
-                'ongkir. Ongkir ${rupiah(basket.shippingFee)}.';
+    const text = 'Setiap pemesan dikenakan ongkir Rp10.000 :3';
+
     return SizedBox(
-      height: 83,
-      child: CuteFrame(
-        asset: 'assets/ui/frames/shipping_notice_blank.png',
-        slice: const Rect.fromLTRB(24, 20, 552, 75),
-        padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+      height: 86,
+      child: CuteDashedFrame(
+        radius: 16,
+        backgroundColor: const Color(0xFFF4E5BE),
+        outerBorderColor: const Color(0xFFE4A640),
+        dashColor: const Color(0xFFD98A34),
+        shadowColor: const Color(0x00000000),
+        showShadow: false,    
+        padding: const EdgeInsets.symmetric(
+          horizontal: 26,
+          vertical: 12,
+        ),
         child: Row(
           children: [
-            const Icon(Icons.local_shipping_outlined, size: 38, color: BakeryColors.cocoa),
+            const Icon(
+              Icons.local_shipping_outlined,
+              size: 28,
+              color: BakeryColors.cocoa,
+            ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(text,
-                  style: BakeryText.label(13, weight: FontWeight.w700)),
+              child: Text(
+                text,
+                style: BakeryText.label(
+                  13,
+                  weight: FontWeight.w700,
+                ),
+              ),
             ),
           ],
         ),
@@ -336,7 +392,12 @@ class _OrderSummary extends StatelessWidget {
         child: CuteFrame(
           asset: 'assets/ui/frames/order_summary_blank.png',
           slice: const Rect.fromLTRB(35, 35, 541, 148),
-          padding: const EdgeInsets.fromLTRB(18, 17, 18, 17),
+          padding: const EdgeInsets.fromLTRB(
+            24, // Kiri
+            20, // Atas
+            24, // Kanan
+            20, // Bawah
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -391,45 +452,60 @@ class _SummaryRow extends StatelessWidget {
 
 class _CuteCheckoutButton extends StatelessWidget {
   const _CuteCheckoutButton({required this.onTap});
+
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-        button: true,
-        enabled: onTap != null,
-        label: 'Buat Pesanan',
-        child: Opacity(
-          opacity: onTap == null ? .55 : 1,
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox(
-              height: 76,
-              child: CuteFrame(
-                asset: 'assets/ui/frames/checkout_button_blank.png',
-                slice: const Rect.fromLTRB(34, 30, 500, 74),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.shopping_bag_outlined,
-                        color: Color(0xFFFFF6E9), size: 24),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Buat Pesanan',
-                      style: TextStyle(
-                        color: Color(0xFFFFF6E9),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const PixelAsset('assets/decor/sparkle.png',
-                        width: 19, height: 19),
-                  ],
-                ),
+  Widget build(BuildContext context) {
+    final disabled = onTap == null;
+
+    return Opacity(
+      opacity: disabled ? 0.55 : 1,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: SizedBox(
+            height: 62,
+            child: CuteDashedFrame(
+              radius: 20,
+              backgroundColor: const Color(0xFFD6654F),
+              outerBorderColor: const Color(0xFF7A342B),
+              dashColor: const Color(0xFFFFBE8D),
+              shadowColor: const Color(0xFF6A2A23),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
+                vertical: 14,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Buat Pesanan',
+                    style: BakeryText.label(
+                      16,
+                      weight: FontWeight.w900,
+                    ).copyWith(color: Colors.white),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.auto_awesome,
+                    size: 14,
+                    color: Color(0xFFFFD36F),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

@@ -299,12 +299,7 @@ class _ShippingNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = basket.itemCount == 0
-        ? 'Gratis ongkir mulai 6 item.'
-        : basket.qualifiesForFreeShipping
-            ? 'Gratis ongkir! Pesananmu sudah 6 item atau lebih.'
-            : 'Kurang ${basket.remainingForFreeShipping} item lagi untuk gratis '
-                'ongkir. Ongkir ${rupiah(basket.shippingFee)}.';
+    final const text = 'Setiap pemesan dikenakan ongkir Rp10.000 :3';
     return SizedBox(
       height: 83,
       child: CuteFrame(

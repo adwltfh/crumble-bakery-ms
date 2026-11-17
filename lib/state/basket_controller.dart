@@ -3,11 +3,11 @@ import '../data/products.dart';
 
 /// UI-only shopping basket. Persists while app is open; no database/backend.
 class BasketController extends ChangeNotifier {
-  BasketController({this.shippingFee = 12000, this.freeShippingAt = 6});
-
-  /// Dummy ongkir, ganti setelah aturan pengiriman diputuskan.
+  
+  BasketController({this.shippingFee = 10000});
+  /// Ongkir flat Rp10.000 per pemesan.
   final int shippingFee;
-  final int freeShippingAt;
+
   final Map<String, int> _quantities = {};
 
   int quantityOf(String productId) => _quantities[productId] ?? 0;
@@ -28,6 +28,14 @@ class BasketController extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  void removeItem(String productId) {
+    if (_quantities.remove(productId) != null) {
+      notifyListeners();
+    }
+  }
+
+
   int get itemCount => _quantities.values.fold(0, (a, b) => a + b);
 
   Iterable<BakeryProduct> get selectedProducts =>
@@ -36,17 +44,9 @@ class BasketController extends ChangeNotifier {
   int get subtotal => selectedProducts.fold(
         0, (sum, product) => sum + product.price * quantityOf(product.id),
       );
-
-  int get remainingForFreeShipping {
-    final remaining = freeShippingAt - itemCount;
-    return remaining > 0 ? remaining : 0;
-  }
-
-  bool get qualifiesForFreeShipping => itemCount >= freeShippingAt;
-
-  /// Shipping is zero when cart is empty, then free at 6+ items.
-  int get shipping =>
-      itemCount == 0 || qualifiesForFreeShipping ? 0 : shippingFee;
+  
+  /// Ongkir flat per pesanan, tanpa minimum quantity.
+  int get shipping => itemCount == 0 ? 0 : shippingFee;
 
   int get total => subtotal + shipping;
 
@@ -60,10 +60,11 @@ class BasketController extends ChangeNotifier {
     lines.add('');
     lines.add('Jumlah item: $itemCount');
     lines.add('Subtotal: ${rupiah(subtotal)}');
-    lines.add('Estimasi ongkir: ${rupiah(shipping)}');
-    lines.add('Estimasi total: ${rupiah(total)}');
+    lines.add('Ongkir: ${rupiah(shipping)}');
+    lines.add('Total pembayaran: ${rupiah(total)}');
+
     lines.add('');
-    lines.add('Mohon konfirmasi stok, ongkir, dan total akhir. Terima kasih!');
+    lines.add('Mohon konfirmasi pesanan saya. Terima kasih!');
     return lines.join('\n');
   }
 }

@@ -16,10 +16,9 @@ class CrumbAndOvenApp extends StatefulWidget {
 }
 
 class _CrumbAndOvenAppState extends State<CrumbAndOvenApp> {
-  // Ongkir sementara Rp12.000 untuk <6 item; ubah sesuai ongkir sebenarnya.
+  // Ongkir sementara Rp10.000 untuk <6 item; ubah sesuai ongkir sebenarnya.
   final BasketController basket = BasketController(
-    shippingFee: 12000,
-    freeShippingAt: 6,
+    shippingFee: 10000,
   );
 
   @override
