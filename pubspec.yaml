@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   http: ^1.6.0
   material_ui: ^1.11.0
+  shared_preferences: ^2.5.6
 
 flutter:
   uses-material-design: true
@@ -23,6 +24,7 @@ flutter:
     - assets/ui/buttons/
     - assets/ui/frames/
     - assets/ui/icons/
+    - assets/checkout/
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:

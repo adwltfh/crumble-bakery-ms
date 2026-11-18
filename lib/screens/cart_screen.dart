@@ -1,24 +1,49 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import '../data/products.dart';
 import '../state/basket_controller.dart';
 import '../theme/bakery_theme.dart';
 import '../widgets/bakery_widgets.dart';
 import '../widgets/cute_bakery_widgets.dart';
 import '../widgets/cute_dashed_frame.dart';
+import '../widgets/order_checkout_sheet.dart';
+import '../services/order_service.dart';
 
 /// Cart is a real order summary; the approved artwork is only its decoration.
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key, required this.basket});
   final BasketController basket;
 
-  Future<void> _copyOrder(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: basket.checkoutText));
+  Future<void> _openCheckout(BuildContext context) async {
+    final orderId = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => OrderCheckoutSheet(
+        basket: basket,
+        onSubmit: (details) => OrderService.createOrder(
+          basket: basket,
+          name: details.name,
+          phone: details.phone,
+          address: details.address,
+          notes: details.notes,
+        ),
+      ),
+    );
+
+   
+if (!context.mounted || orderId == null) return;
+
+// Pastikan keranjang kosong setelah checkout sukses.
+    await basket.clear();
+
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Detail pesanan disalin. Bisa kamu kirim ke bakery.'),
-      backgroundColor: BakeryColors.cocoa,
-    ));
+
+// Kembali ke halaman Menu.
+    Navigator.of(context).popUntil(
+      (route) => route.isFirst,
+    );
+
   }
 
   @override
@@ -89,7 +114,7 @@ class CartScreen extends StatelessWidget {
                           child: _CuteCheckoutButton(
                             onTap: basket.itemCount == 0
                                 ? null
-                                : () => _copyOrder(context),
+                                : () => _openCheckout(context),
                           ),
                         ),
                       ),

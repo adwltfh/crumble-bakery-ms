@@ -3,23 +3,31 @@ import 'screens/menu_screen.dart';
 import 'state/basket_controller.dart';
 import 'theme/bakery_theme.dart';
 
-void main() {
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const CrumbAndOvenApp());
+
+  final basket = await BasketController.create();
+
+  runApp(CrumbAndOvenApp(basket: basket));
 }
 
+
 class CrumbAndOvenApp extends StatefulWidget {
-  const CrumbAndOvenApp({super.key});
+  const CrumbAndOvenApp({
+    super.key,
+    required this.basket,
+  });
+
+  final BasketController basket;
 
   @override
   State<CrumbAndOvenApp> createState() => _CrumbAndOvenAppState();
 }
 
+
 class _CrumbAndOvenAppState extends State<CrumbAndOvenApp> {
-  // Ongkir sementara Rp10.000 untuk <6 item; ubah sesuai ongkir sebenarnya.
-  final BasketController basket = BasketController(
-    shippingFee: 10000,
-  );
+  late final BasketController basket = widget.basket;
 
   @override
   void dispose() {

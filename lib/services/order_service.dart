@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 import '../state/basket_controller.dart';
@@ -18,9 +19,7 @@ class OrderService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/orders'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': name,
         'phone': phone,
@@ -34,30 +33,22 @@ class OrderService {
             },
         ],
       }),
-    );
+    ).timeout(const Duration(seconds: 25));
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception('Respons server tidak valid (${response.statusCode}).');
+    }
 
     if (response.statusCode != 201) {
-      throw Exception(
-        data['message'] ?? 'Gagal membuat pesanan',
-      );
+      throw Exception(data['message']?.toString() ??
+          'Gagal menyimpan pesanan (${response.statusCode}).');
     }
-
+    if (data['success'] != true || data['orderId'] is! String) {
+      throw Exception('Server tidak mengirimkan Order ID.');
+    }
     return data['orderId'] as String;
-  }
-
-  static Future<bool> isOrderOpen() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/orders'),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Gagal mengecek jadwal pre-order');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-    return data['open'] == true;
   }
 }
