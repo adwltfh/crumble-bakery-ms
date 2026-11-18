@@ -1,117 +1,126 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web/web.dart' as web;
 
 import '../data/products.dart';
 
+/// Crumb & Oven cart storage rules:
+/// - survives navigation and page refresh in the same tab;
+/// - resets after the browser tab session ends;
+/// - resets on the first page load of a new APP_BUILD_ID;
+/// - resets after successful checkout via clear().
+///
+/// This controller is intended for Flutter Web only.
 class BasketController extends ChangeNotifier {
   BasketController({this.shippingFee = 10000});
 
-  static const String _storageKey = 'crumb_oven_basket_v1';
+  static const String _cartKey = 'crumb_oven_cart_session_v1';
+  static const String _buildKey = 'crumb_oven_cart_build_id';
+  static const String _buildId = String.fromEnvironment(
+    'APP_BUILD_ID',
+    defaultValue: 'local-dev',
+  );
 
   final int shippingFee;
-  final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
+  final Map<String, int> _quantities = <String, int>{};
 
-  final Map<String, int> _quantities = {};
-
-  // Menjaga urutan penulisan ketika user cepat menekan +/-.
-  Future<void> _writeQueue = Future<void>.value();
-
-  /// Buat controller dan pulihkan keranjang sebelum aplikasi tampil.
+  /// Keep the async factory used by the existing main.dart.
   static Future<BasketController> create() async {
-    final basket = BasketController();
-    await basket._restore();
-    return basket;
+    final controller = BasketController();
+    controller._restore();
+    return controller;
   }
 
-  Future<void> _restore() async {
+  void _restore() {
+    // Erase data from the previous shared_preferences implementation.
+    // Do not clear other website storage keys.
     try {
-      final raw = await _prefs.getString(_storageKey);
-      if (raw == null) return;
+      final oldStorage = web.window.localStorage;
+      oldStorage.removeItem('flutter.crumb_oven_basket_v1');
+      oldStorage.removeItem('crumb_oven_basket_v1');
+    } catch (_) {
+      // Browser may block persistent storage; in-memory cart still works.
+    }
 
-      final decoded = jsonDecode(raw);
-      if (decoded is! Map) return;
-
-      final validIds = products.map((p) => p.id).toSet();
-
-      _quantities.clear();
-
-      for (final entry in decoded.entries) {
-        final id = entry.key;
-        final quantity = entry.value;
-
-        if (id is String &&
-            validIds.contains(id) &&
-            quantity is int &&
-            quantity > 0) {
-          _quantities[id] = quantity;
-        }
+    try {
+      final session = web.window.sessionStorage;
+      final storedBuild = session.getItem(_buildKey);
+      if (storedBuild != _buildId) {
+        session.removeItem(_cartKey);
+        session.setItem(_buildKey, _buildId);
+        return;
       }
 
-      notifyListeners();
-    } catch (error) {
-      debugPrint('Gagal memulihkan keranjang: $error');
+      final raw = session.getItem(_cartKey);
+      if (raw == null || raw.isEmpty) return;
+
+      final saved = jsonDecode(raw);
+      if (saved is! Map) return;
+
+      for (final product in products) {
+        final rawQuantity = saved[product.id];
+        if (rawQuantity is int && rawQuantity > 0) {
+          _quantities[product.id] = rawQuantity;
+        }
+      }
+    } catch (_) {
+      // Keep basket empty when storage is unavailable/corrupt.
+      _quantities.clear();
     }
   }
 
   void _save() {
-    final snapshot = jsonEncode(_quantities);
-
-    _writeQueue = _writeQueue
-        .then((_) => _prefs.setString(_storageKey, snapshot))
-        .catchError((Object error, StackTrace stack) {
-      debugPrint('Gagal menyimpan keranjang: $error');
-    });
+    try {
+      final session = web.window.sessionStorage;
+      session.setItem(_buildKey, _buildId);
+      if (_quantities.isEmpty) {
+        session.removeItem(_cartKey);
+      } else {
+        session.setItem(_cartKey, jsonEncode(_quantities));
+      }
+    } catch (_) {
+      // Allow ordering in environments where storage is blocked.
+    }
   }
 
   int quantityOf(String productId) => _quantities[productId] ?? 0;
 
   void increment(String productId) {
-    _quantities.update(
-      productId,
-      (value) => value + 1,
-      ifAbsent: () => 1,
-    );
-
-    notifyListeners();
+    if (!products.any((product) => product.id == productId)) return;
+    _quantities.update(productId, (value) => value + 1, ifAbsent: () => 1);
     _save();
+    notifyListeners();
   }
 
   void decrement(String productId) {
     final current = quantityOf(productId);
     if (current <= 0) return;
-
     if (current == 1) {
       _quantities.remove(productId);
     } else {
       _quantities[productId] = current - 1;
     }
-
-    notifyListeners();
     _save();
+    notifyListeners();
   }
 
   void removeItem(String productId) {
-    if (_quantities.remove(productId) != null) {
-      notifyListeners();
-      _save();
-    }
+    if (_quantities.remove(productId) == null) return;
+    _save();
+    notifyListeners();
   }
 
-  /// Dipanggil HANYA setelah API mengonfirmasi order sukses.
   Future<void> clear() async {
     _quantities.clear();
-    notifyListeners();
-
     _save();
-    await _writeQueue;
+    notifyListeners();
   }
 
   int get itemCount => _quantities.values.fold(0, (a, b) => a + b);
 
   Iterable<BakeryProduct> get selectedProducts =>
-      products.where((p) => quantityOf(p.id) > 0);
+      products.where((product) => quantityOf(product.id) > 0);
 
   int get subtotal => selectedProducts.fold(
         0,
@@ -123,27 +132,17 @@ class BasketController extends ChangeNotifier {
   int get total => subtotal + shipping;
 
   String get checkoutText {
-    final lines = <String>[
-      'Halo Crumb & Oven, saya ingin pesan:',
-    ];
-
+    final lines = <String>['Halo Crumb & Oven, saya ingin pesan:'];
     for (final product in selectedProducts) {
       final quantity = quantityOf(product.id);
-
-      lines.add(
-        '- ${product.name} x$quantity = '
-        '${rupiah(product.price * quantity)}',
-      );
+      lines.add('- ${product.name} x$quantity = '
+          '${rupiah(product.price * quantity)}');
     }
-
     lines.add('');
     lines.add('Jumlah item: $itemCount');
     lines.add('Subtotal: ${rupiah(subtotal)}');
     lines.add('Ongkir: ${rupiah(shipping)}');
-    lines.add('Total pembayaran: ${rupiah(total)}');
-    lines.add('');
-    lines.add('Mohon konfirmasi pesanan saya. Terima kasih!');
-
+    lines.add('Total: ${rupiah(total)}');
     return lines.join('\n');
   }
 }
@@ -151,13 +150,9 @@ class BasketController extends ChangeNotifier {
 String rupiah(int amount) {
   final digits = amount.toString();
   final buffer = StringBuffer();
-
   for (var i = 0; i < digits.length; i++) {
-    if (i > 0 && (digits.length - i) % 3 == 0) {
-      buffer.write('.');
-    }
+    if (i > 0 && (digits.length - i) % 3 == 0) buffer.write('.');
     buffer.write(digits[i]);
   }
-
   return 'Rp $buffer';
 }

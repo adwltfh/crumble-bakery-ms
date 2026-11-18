@@ -105,8 +105,8 @@ if (!context.mounted || orderId == null) return;
                 builder: (context, constraints) {
                   // Preserve more scrolling room on short phone screens.
                   final shortScreen = constraints.maxHeight < 640;
-                  final footerHeight = shortScreen ? 145.0 : 190.0;
-                  final footerSpace = shortScreen ? 52.0 : 106.0;
+                  final footerHeight = shortScreen ? 110.0 : 135.0;
+                  final footerSpace = shortScreen ? 50.0 : 63.0;
 
                   return Stack(
                     children: [
@@ -191,10 +191,15 @@ if (!context.mounted || orderId == null) return;
                           // Checkout stays fixed and still opens the real form.
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-                            child: _CuteCheckoutButton(
-                              onTap: basket.itemCount == 0
-                                  ? null
-                                  : () => _openCheckout(context),
+                            child: Center(
+                              child: FractionallySizedBox(
+                                widthFactor: 0.86,
+                                child: _CuteCheckoutButton(
+                                  onTap: basket.itemCount == 0
+                                      ? null
+                                      : () => _openCheckout(context),
+                                ),
+                              ),
                             ),
                           ),
 
@@ -911,15 +916,15 @@ class _CuteCheckoutButton extends StatelessWidget {
 
           onTap: onTap,
 
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(11),
 
           child: SizedBox(
 
-            height: 62,
+            height: 50,
 
             child: CuteDashedFrame(
 
-              radius: 20,
+              radius: 11,
 
               backgroundColor: const Color(0xFFD6654F),
 
@@ -931,9 +936,9 @@ class _CuteCheckoutButton extends StatelessWidget {
 
               padding: const EdgeInsets.symmetric(
 
-                horizontal: 22,
+                horizontal: 14,
 
-                vertical: 14,
+                vertical: 8,
 
               ),
 
@@ -947,7 +952,7 @@ class _CuteCheckoutButton extends StatelessWidget {
 
                     Icons.shopping_bag_outlined,
 
-                    size: 18,
+                    size: 16,
 
                     color: Colors.white,
 
@@ -961,7 +966,7 @@ class _CuteCheckoutButton extends StatelessWidget {
 
                     style: BakeryText.label(
 
-                      16,
+                      14,
 
                       weight: FontWeight.w900,
 
@@ -975,7 +980,7 @@ class _CuteCheckoutButton extends StatelessWidget {
 
                     Icons.auto_awesome,
 
-                    size: 14,
+                    size: 12,
 
                     color: Color(0xFFFFD36F),
 
