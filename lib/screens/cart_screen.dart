@@ -106,7 +106,7 @@ if (!context.mounted || orderId == null) return;
                   // Preserve more scrolling room on short phone screens.
                   final shortScreen = constraints.maxHeight < 640;
                   final footerHeight = shortScreen ? 145.0 : 190.0;
-                  final footerSpace = shortScreen ? 78.0 : 132.0;
+                  final footerSpace = shortScreen ? 52.0 : 106.0;
 
                   return Stack(
                     children: [
